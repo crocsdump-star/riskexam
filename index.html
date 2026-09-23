@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Risk Management Exam</title>
+<style>
+:root{--navy:#17385a;--gold:#f2c53d;--bg:#eef3fb;--ok:#1f8f63;--okbg:#e2f6ec;--no:#c2415d;--nobg:#fdeaee;--ink:#1d2733}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.5 "Nunito","Trebuchet MS",system-ui,sans-serif}
+header{background:var(--navy);color:#fff;padding:28px 20px 22px;border-bottom:6px solid var(--gold)}
+header div,main{max-width:820px;margin:0 auto}
+h1{margin:0;font:700 clamp(26px,5vw,38px)/1.15 "Fredoka","Trebuchet MS",system-ui,sans-serif}
+header p{margin:6px 0 0;opacity:.85}
+.bar{position:sticky;top:0;z-index:5;background:#fff;border-bottom:1px solid #d5dfee;padding:8px 20px}
+.bar div{max-width:820px;margin:0 auto;display:flex;gap:14px;align-items:center;font-weight:700;font-size:15px}
+.track{flex:1;height:10px;background:#dfe7f3;border-radius:9px;overflow:hidden}
+.fill{height:100%;width:0;background:var(--gold);transition:width .3s}
+main{padding:10px 16px 60px}
+h2{margin:34px 0 4px;font:600 24px "Fredoka","Trebuchet MS",sans-serif;color:var(--navy)}
+.sub{margin:0 0 12px;color:#55657a;font-size:15px}
+.card{background:#fff;border-radius:14px;padding:18px 20px;margin:0 0 14px;border:2px solid transparent;box-shadow:0 1px 3px #17385a1a}
+.card.ok{border-color:var(--ok)}.card.no{border-color:var(--no)}
+.q{font-weight:700;margin:0 0 12px}
+.q span{color:#6c7c92;margin-right:6px}
+.opt{display:block;width:100%;text-align:left;font:inherit;background:#f6f9fd;border:2px solid #d5dfee;border-radius:10px;padding:10px 14px;margin:0 0 8px;cursor:pointer}
+.opt:hover:not(:disabled){border-color:var(--navy)}
+.opt:disabled{cursor:default}
+.opt.good{background:var(--okbg);border-color:var(--ok)}
+.opt.bad{background:var(--nobg);border-color:var(--no)}
+input[type=text],select{font:inherit;width:100%;padding:9px 12px;border:2px solid #d5dfee;border-radius:10px;background:#fff}
+input[type=text]{margin:0 0 8px}
+input:focus,select:focus,button:focus-visible{outline:3px solid var(--gold);outline-offset:1px}
+.mrow{display:grid;grid-template-columns:1fr 84px;gap:10px;align-items:center;margin:0 0 8px}
+.defs{margin:12px 0 0;padding:12px 14px;background:#f6f9fd;border-radius:10px;font-size:15px}
+.defs p{margin:0 0 6px}
+.mrow.good select,input.good{border-color:var(--ok);background:var(--okbg)}
+.mrow.bad select,input.bad{border-color:var(--no);background:var(--nobg)}
+.btn{font:700 16px "Fredoka","Trebuchet MS",sans-serif;background:var(--navy);color:#fff;border:0;border-radius:10px;padding:11px 20px;cursor:pointer}
+.btn.alt{background:#fff;color:var(--navy);border:2px solid var(--navy)}
+.btn.gold{background:var(--gold);color:var(--navy)}
+.msg{margin:12px 0 0;padding:10px 14px;border-radius:10px;font-weight:700}
+.msg.ok{background:var(--okbg);color:#0f5b3f}.msg.no{background:var(--nobg);color:#8f2340}
+.msg small{display:block;font-weight:600;margin-top:4px;color:var(--ink)}
+#result{background:var(--navy);color:#fff;border-radius:16px;padding:28px 22px;text-align:center;margin-top:26px}
+#result h2{color:var(--gold);margin:0 0 6px;font-size:30px}
+#result .score{font:700 54px/1 "Fredoka",sans-serif}
+#result p{max-width:520px;margin:10px auto 20px}
+.btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+#result .btn{background:#fff;color:var(--navy)}#result .btn.gold{background:var(--gold)}
+@media(prefers-reduced-motion:reduce){.fill{transition:none}}
+</style>
+</head>
+<body>
+<header><div>
+<h1>Risk Management Exam</h1>
+<p>Safety, Security &amp; Sanitation &middot; BS-HTM &middot; 50 items, checked as you go. You can do this, Wiku!</p>
+</div></header>
+<div class="bar"><div><span id="prog">0 / 50</span><span class="track"><span class="fill" id="fill" style="display:block"></span></span><span id="sc">Score 0</span></div></div>
+<main id="exam"></main>
+
+<script>
+/* ---------- Question bank (from the lesson slides) ---------- */
+const D=[
+["Safety","preventing accidents, injuries, and emergencies"],
+["Security","protecting guests, employees, property, information, and assets from theft, violence, unauthorized access, and fraud"],
+["Sanitation","maintaining cleanliness and preventing the spread of diseases and contamination"],
+["Hazard identification","recognizing potential sources of accidents or injuries"],
+["Risk assessment","determining the likelihood and possible consequences of identified hazards"],
+["Risk prevention and control","implementing measures to eliminate or reduce risks"],
+["Safety policies and standards","establishing rules and procedures for safe operations"],
+["Safety training","training employees in first aid, fire safety, proper equipment use, and emergency response"],
+["Safety inspection and monitoring","regularly checking facilities, equipment, food areas, guest rooms, and other operation areas"],
+["Incident reporting","recording accidents, injuries, hazards, and near-miss incidents for corrective action"],
+["Continuous improvement","reviewing safety practices and improving them based on incidents, inspections, and feedback"],
+["Emergency preparedness","developing plans before an emergency occurs"],
+["Emergency response plan","establishing specific actions to be taken during different emergencies"],
+["Emergency communication","providing clear instructions and informing guests, employees, authorities, and emergency responders"],
+["Emergency procedures","establishing escape routes, emergency exits, assembly areas, and evacuation procedures"],
+["Emergency equipment","maintaining fire extinguishers, alarms, first aid kits, emergency lighting, and communication devices"],
+["Assignment of responsibilities","designating employees or emergency teams to perform specific tasks"],
+["First aid and medical assistance","providing immediate care and arranging professional medical assistance when necessary"],
+["Emergency drills and training","conducting fire, earthquake, evacuation, and other emergency exercises"],
+["Coordination with authorities","working with police, fire departments, hospitals, disaster-response agencies, and local government"],
+["Post-emergency evaluation","assessing what happened, documenting the response, and improving the emergency plan"],
+["Threat","any person, condition, activity, event, or situation with the potential to cause injury, illness, property damage, financial loss, or disruption of operations"],
+["Vulnerability","a weakness or condition that makes a person, facility, system, or organization more likely to be affected by a threat"],
+["Physical hazard","a factor in the environment that can cause harm through direct contact, such as a wet floor or loose cable"],
+["Chemical hazard","any toxic, flammable, or corrosive substance that can cause a health risk"],
+["Biological hazard","an organism or substance from an organism that threatens health, such as mold, bacteria, or viruses"],
+["Ergonomic hazard","a physical condition that risks the musculoskeletal system through repetitive motion, awkward posture, or poor workspace design"],
+["Electrical hazard","a hazard that can cause electric shock, burns, fires, or death, such as damaged cords or overloaded outlets"],
+["Fire and explosion hazard","conditions such as gas leaks, grease fires, and flammable materials that may cause fire or explosion"],
+["Security hazard","intentional acts or threats such as theft, unauthorized access, or violence that may harm guests, employees, or property"],
+["Sanitation and food safety hazard","poor hygiene or contamination that causes illness, such as raw chicken stored above ready-to-eat food"],
+["Safety management","the systematic process of identifying hazards, assessing risks, preventing accidents, and protecting people, property, and the environment"],
+["Risk management","the methodical process of identifying, assessing, controlling, and monitoring risks that may affect guests, employees, facilities, operations, and the environment"]
+];
+/* q, how many to ask, items as "display|keyword|keyword" */
+const ENUM=[
+{q:"risk treatment options",k:5,i:["Risk avoidance|avoid","Risk reduction|reduc","Risk sharing|shar","Risk retention|retention|retain","Risk escalation|escalat"]},
+{q:"common risk assessment techniques",k:5,i:["Identify hazard situations, places, and things|hazard","Assess the risk matrix (severity)|matrix|severity","Inspection and walkthrough examination|inspection|walkthrough|walk through","Job safety analysis|job safety","Standard checklists|checklist","Analysis of incidents and accidents|incident|accident","The \"what if\" analysis|what if"]},
+{q:"components of safety management",k:5,i:["Hazard identification|hazard ident","Risk assessment|assess","Risk prevention and control|prevention|control","Safety policies and standards|polic|standard","Safety training|training","Safety inspection and monitoring|inspection|monitor","Incident reporting|report","Continuous improvement|improve"]},
+{q:"components of emergency procedures",k:5,i:["Emergency preparedness|prepared","Emergency response plan|response","Emergency communication|communicat","Evacuation procedures|evacuat","Emergency equipment|equipment","Assignment of responsibilities|responsib|assign","First aid and medical assistance|first aid|medical","Emergency drills and training|drill|training","Coordination with authorities|authorit|coordinat","Post-emergency evaluation|evaluat"]},
+{q:"types of workplace hazards",k:6,i:["Physical hazard|physical","Chemical hazard|chemical","Biological hazard|biolog","Ergonomic hazard|ergonom","Electrical hazard|electric","Fire and explosion hazard|fire|explosion","Security hazard|security","Sanitation and food safety hazard|sanitation|food"]},
+{q:"benefits of effective risk management in hospitality",k:5,i:["Protection of guests and employees|protect","Prevention of accidents, illnesses, and property damage|prevent","Cleanliness and public health|clean|public health","Reduced financial losses and disruptions|financ|disrupt|loss","Compliance with laws and standards|complian|law|regulation","Builds customer trust and satisfaction|trust|satisf","Protects the establishment's reputation|reputation","Operational continuity during emergencies|continuity"]},
+{q:"the three focus areas of this course",k:3,i:["Safety|safety","Security|security","Sanitation|sanitation"]},
+{q:"steps in assessing risk scenarios",k:5,i:["Determine the context|context","Identify potential hazards|hazard","Risk analysis (gravity)|analysis|analy","Evaluation and prioritizing|evaluat|priorit","Select control measures|select|control","Implement control practices|implement","Monitor and review|monitor|review"]}
+];
+/* q, correct answer, wrong answers... */
+const EXTRA=[
+["Scenario: water is spilled on a busy walkway and nobody cleans it or places a sign. What is the primary safety hazard?","An unmarked wet floor (slip hazard)","An overloaded power outlet","Raw chicken stored above ready-to-eat food","Loud kitchen noise"],
+["Scenario: a staff member props open the rear emergency exit with a box. What is the primary security vulnerability?","An unlocked, unattended back entry","A wet walkway","Poor kitchen ventilation","A missing first aid kit"],
+["Which OHS standard is named in the lesson?","ISO 45001:2018","ISO 9001:2015","ISO 14001:2015","ISO 22000:2018"],
+["What is the proper way to lift heavy objects?","Bend at the knees and lift with the legs","Bend at the waist and lift with the back","Twist while lifting","Lift quickly to finish sooner"],
+["Which list shows the risk treatment options?","Avoidance, reduction, sharing, retention, escalation","Avoidance, denial, delay, blame, escalation","Reduction, storage, retention, training, sharing","Sharing, ignoring, retention, escape, control"]
+];
+const PRAISE=["Yay, Wiku! That's correct! 🎉","Amazing, Wiku! You got it right! 🌟","Congratulations, baby Wiku! So proud of you! 💖","Correct! You're so smart, Wiku! ✨","Wiku is on fire! Keep going! 🔥","Bravo, Wiku! Another one right! 👏","Perfect! Great job, my Wiku! 🥰","You did it, Wiku! Keep shining! 🌈"];
+const CHEER=["It's okay, Wiku, mistakes help us learn. You've got this! 💪","Almost, baby Wiku! Read the answer and you'll remember it next time. 💖","Don't worry, Wiku. Take a breath and try the next one! 🌷","That's alright! I believe in you, Wiku. Keep going! ✨","Every mistake makes you stronger, Wiku! You can do it! 🌟","Good try, Wiku! You're learning and I'm proud of you. 🥰"];
+
+/* ---------- Helpers ---------- */
+const sh=a=>{a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
+const pick=a=>a[Math.random()*a.length|0];
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const L="ABCDE";
+let exam=[];
+
+/* ---------- Build exam ---------- */
+function build(){
+  const en=sh(ENUM).map(e=>({t:"enum",e,n:sh(e.i).slice(0,e.k)}));
+  const ma=Array.from({length:12},()=>({t:"match",pairs:sh(D).slice(0,5)}));
+  const pool=sh(D).slice(0,25);
+  const mc=pool.map((p,i)=>{
+    const others=sh(D.filter(x=>x!==p)).slice(0,3);
+    return i%2?{t:"mc",q:`Which term means: “${p[1]}”?`,a:p[0],o:[p[0],...others.map(x=>x[0])]}
+              :{t:"mc",q:`Which best describes “${p[0]}”?`,a:p[1],o:[p[1],...others.map(x=>x[1])]};
+  }).concat(EXTRA.map(x=>({t:"mc",q:x[0],a:x[1],o:x.slice(1)})));
+  exam=[...en,...ma,...sh(mc)];
+  exam.forEach(prep);
+}
+function prep(q){ // (re)shuffle presentation, clear answers
+  q.done=false;q.ok=false;q.sel=[];q.pick=null;
+  if(q.t==="mc")q.ord=sh(q.o);
+  if(q.t==="match")q.defs=sh(q.pairs.map(p=>p[1]));
+}
+
+/* ---------- Render ---------- */
+function render(){
+  const H={enum:["Part I. Enumeration","Type your answers in any order. Wording can be short."],match:["Part II. Matching type","Pick the letter of the definition that fits each term."],mc:["Part III. Multiple choice","Tap the best answer."]};
+  let html="",last="",no=0;
+  exam.forEach((q,i)=>{
+    if(q.t!==last){html+=`<h2>${H[q.t][0]}</h2><p class="sub">${H[q.t][1]}</p>`;last=q.t}
+    html+=`<section class="card" id="c${i}">${body(q,i,++no)}</section>`;
+  });
+  html+=`<section id="result" hidden></section>`;
+  $("exam").innerHTML=html;
+  exam.forEach((q,i)=>q.done&&fb(q,i));
+  stats();
+}
+const $=id=>document.getElementById(id);
+
+function body(q,i,n){
+  if(q.t==="mc")return `<p class="q"><span>${n}.</span>${esc(q.q)}</p>`+q.ord.map((o,k)=>`<button class="opt" data-k="${k}" onclick="ansMC(${i},${k})">${esc(o)}</button>`).join("")+`<div id="m${i}"></div>`;
+  if(q.t==="enum")return `<p class="q"><span>${n}.</span>Enumerate ${q.n.length} ${esc(q.e.q)}.</p>`+q.n.map((_,k)=>`<input type="text" id="e${i}_${k}" placeholder="Answer ${k+1}" autocomplete="off">`).join("")+`<button class="btn" id="b${i}" onclick="ansEnum(${i})">Check answers</button><div id="m${i}"></div>`;
+  return `<p class="q"><span>${n}.</span>Match each term to its definition.</p>`+q.pairs.map((p,k)=>`<div class="mrow" id="r${i}_${k}"><span>${esc(p[0])}</span><select onchange="ansMatch(${i})"><option value="">Pick</option>${[...L].slice(0,5).map((l,x)=>`<option value="${x}">${l}</option>`).join("")}</select></div>`).join("")+`<div class="defs">${q.defs.map((d,k)=>`<p><b>${L[k]}.</b> ${esc(d)}</p>`).join("")}</div><div id="m${i}"></div>`;
+}
+
+/* ---------- Answering ---------- */
+function ansMC(i,k){const q=exam[i];if(q.done)return;q.pick=k;finish(q,i,q.ord[k]===q.a)}
+function ansMatch(i){
+  const q=exam[i];if(q.done)return;
+  const s=[...$("c"+i).querySelectorAll("select")].map(x=>x.value);
+  if(s.some(v=>v===""))return;
+  q.sel=s.map(Number);
+  finish(q,i,q.pairs.every((p,k)=>q.defs[q.sel[k]]===p[1]));
+}
+function ansEnum(i){
+  const q=exam[i];if(q.done)return;
+  const val=q.n.map((_,k)=>$("e"+i+"_"+k).value.trim());
+  if(val.some(v=>!v)){$("m"+i).innerHTML=`<div class="msg no">Please fill in every answer first, Wiku. 💖</div>`;return}
+  const used=new Set();
+  q.sel=val.map(v=>{const t=v.toLowerCase().replace(/[^a-z0-9]+/g," ").trim();
+    const idx=q.e.i.findIndex((it,x)=>!used.has(x)&&it.split("|").slice(1).some(kw=>t.includes(kw)));
+    if(idx>=0)used.add(idx);return idx});
+  q.vals=val;
+  finish(q,i,q.sel.every(x=>x>=0));
+}
+function finish(q,i,ok){q.done=true;q.ok=ok;fb(q,i);stats();
+  if(exam.every(x=>x.done))showResult()}
+
+/* mark card + message (also used when re-rendering) */
+function fb(q,i){
+  const c=$("c"+i);c.classList.add(q.ok?"ok":"no");
+  let extra="";
+  if(q.t==="mc"){
+    c.querySelectorAll(".opt").forEach((b,k)=>{b.disabled=true;
+      if(q.ord[k]===q.a)b.classList.add("good");else if(k===q.pick)b.classList.add("bad")});
+    if(!q.ok)extra=`Correct answer: ${esc(q.a)}`;
+  }else if(q.t==="match"){
+    c.querySelectorAll("select").forEach((s,k)=>{s.disabled=true;s.value=q.sel[k];
+      const good=q.defs[q.sel[k]]===q.pairs[k][1];
+      $("r"+i+"_"+k).classList.add(good?"good":"bad")});
+    if(!q.ok)extra="Correct matches: "+q.pairs.map(p=>`${esc(p[0])} = ${L[q.defs.indexOf(p[1])]}`).join(", ");
+  }else{
+    q.n.forEach((_,k)=>{const el=$("e"+i+"_"+k);el.disabled=true;el.value=q.vals[k];el.classList.add(q.sel[k]>=0?"good":"bad")});
+    $("b"+i).hidden=true;
+    if(!q.ok)extra="Some correct answers: "+q.n.map(x=>esc(x.split("|")[0])).join("; ");
+  }
+  $("m"+i).innerHTML=`<div class="msg ${q.ok?"ok":"no"}">${q.ok?"✅ ":"❌ "}${q.msg||(q.msg=pick(q.ok?PRAISE:CHEER))}${extra?`<small>${extra}</small>`:""}</div>`;
+}
+
+function stats(){
+  const d=exam.filter(q=>q.done).length,s=exam.filter(q=>q.ok).length;
+  $("prog").textContent=`${d} / ${exam.length}`;$("sc").textContent=`Score ${s}`;
+  $("fill").style.width=d/exam.length*100+"%";
+}
+function showResult(){
+  const s=exam.filter(q=>q.ok).length,p=s/exam.length*100;
+  const m=p>=90?"Wow, Wiku! You are a Risk Management superstar! I'm so proud of you! 🏆💖":p>=75?"Great job, Wiku! You're doing so well, keep it up! 🌟":p>=50?"Good effort, baby Wiku! You're getting there. One more try and you'll shine! 💪":"Don't be sad, Wiku. Every try makes you stronger. Read your notes and try again, I believe in you! 🌷";
+  const r=$("result");r.hidden=false;
+  r.innerHTML=`<h2>Exam finished!</h2><div class="score">${s} / ${exam.length}</div><p>${m}</p>
+  <div class="btns"><button class="btn" onclick="retake()">Retake exam</button><button class="btn" onclick="shuffleExam()">Shuffle exam</button><button class="btn gold" onclick="newExam()">Generate new exam</button></div>`;
+  r.scrollIntoView({behavior:"smooth",block:"center"});
+}
+
+/* ---------- Result buttons ---------- */
+function toTop(){window.scrollTo({top:0,behavior:"smooth"})}
+function retake(){exam.forEach(q=>{const o=q.ord,d=q.defs;prep(q);if(o)q.ord=o;if(d)q.defs=d;q.msg=null});render();toTop()}   // same questions, same order
+function shuffleExam(){ // same questions, new order
+  const g={enum:[],match:[],mc:[]};exam.forEach(q=>g[q.t].push(q));
+  exam=[...sh(g.enum),...sh(g.match),...sh(g.mc)];exam.forEach(q=>{prep(q);q.msg=null});render();toTop()}
+function newExam(){build();render();toTop()}
+
+build();render();
+</script>
+</body>
+</html>
